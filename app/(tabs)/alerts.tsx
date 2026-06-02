@@ -1,0 +1,30 @@
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+
+export default function AlertsScreen() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Alerts</Text>
+      <Text style={styles.text}>Emergency alerts will appear here.</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  text: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#6B7280",
+  },
+});
