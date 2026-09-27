@@ -66,6 +66,30 @@ export default function QuizScreen() {
   const [progress, setProgress] =
     React.useState<QuizProgress>({});
 
+    React.useEffect(() => {
+  const loadSavedProgress = async () => {
+    try {
+      const user = await getCurrentUser();
+
+      if (!user) {
+        return;
+      }
+
+      const savedProgress =
+        await getUserQuizProgress(user.id);
+
+      setProgress(savedProgress);
+    } catch (error) {
+      console.log(
+        "Could not load quiz progress:",
+        error
+      );
+    }
+  };
+
+  loadSavedProgress();
+}, []);
+
   const getCategoryProgress = (
     categoryId: string
   ): CategoryProgress => {
@@ -135,41 +159,54 @@ export default function QuizScreen() {
     }
   };
 
-  const goNext = () => {
-    if (!selectedTier || !selectedCategory) {
-      return;
-    }
+  const goNext = async () => {
+  if (!selectedTier || !selectedCategory) {
+    return;
+  }
 
-    if (
-      currentQuestion + 1 <
-      selectedTier.questions.length
-    ) {
-      setCurrentQuestion(
-        (previousQuestion) =>
-          previousQuestion + 1
+  if (
+    currentQuestion + 1 <
+    selectedTier.questions.length
+  ) {
+    setCurrentQuestion(
+      (previousQuestion) =>
+        previousQuestion + 1
+    );
+
+    setSelectedAnswer(null);
+  } else {
+    // Final score already includes the selected answer
+    const passed = score >= 4;
+
+    if (passed) {
+      // Update quiz screen immediately
+      markTierPassed(
+        selectedCategory.id,
+        selectedTier.id
       );
 
-      setSelectedAnswer(null);
-    } else {
-      // 4/5 or 5/5 = pass
-      if (score >= 4) {
-        markTierPassed(
+      // Save progress permanently for this user
+      const user = await getCurrentUser();
+
+      if (user) {
+        await saveTierCompletion(
+          user.id,
           selectedCategory.id,
           selectedTier.id
         );
       }
-
-      setQuizFinished(true);
     }
-  };
 
-  const restartTier = () => {
-    setCurrentQuestion(0);
-    setSelectedAnswer(null);
-    setScore(0);
-    setQuizFinished(false);
-  };
+    setQuizFinished(true);
+  }
+};
 
+const restartTier = () => {
+  setCurrentQuestion(0);
+  setSelectedAnswer(null);
+  setScore(0);
+  setQuizFinished(false);
+};
   // ======================================================
   // SCREEN 1 — DISASTER CATEGORIES
   // ======================================================
